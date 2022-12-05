@@ -13,7 +13,7 @@ generated exponents are always 2.
 MODIFICATIONS BY VERSION:
 12/2/2022 - Laid out main window (no logic)
 12/3/2022 - Added essential logic
-12/4/2022 - Added comments
+12/4/2022 - Added comments, background color
 """
 # imports
 from breezypythongui import EasyFrame
@@ -25,10 +25,11 @@ from random import randint
 class PEMDAS(EasyFrame):
 
     def __init__(self):
-        EasyFrame.__init__(self, title = "testGUI_2")
+        EasyFrame.__init__(self, title = "PEMDAS+")
         self.setResizable(False)
+        self.setBackground("lightyellow")
 
-        # instance variables
+        # instance variables not associated with window components
         self.nbrOperators = 1   # the number of operators in expression
         self.expresssion = ""   # the expression being presented to user
         self.attempts = 0       # the number of user attempts to solve expression
@@ -42,14 +43,17 @@ class PEMDAS(EasyFrame):
         self.addLabel(text = "PEMDAS+", 
             font = titleFont,
             foreground = "red",
+            background = "lightyellow",
             row = 0, column = 1,
             sticky = "NSEW")
         self.addLabel(text = "Score",
             font = normalFont,
+            background = "lightyellow",
             row = 1, column = 0,
             sticky = "W")
         self.addLabel(text = "Lives",
             font = normalFont,
+            background = "lightyellow",
             row = 1, column = 2,
             sticky = "W")
         self.score = self.addIntegerField(value = 0,    # user score
@@ -66,14 +70,17 @@ class PEMDAS(EasyFrame):
             "GET expression - solve - enter answer - SUBMIT",
             font = instructionsFont,
             foreground = "red",
+            background = "lightyellow",
             row = 4, column = 1, 
             sticky = "NSEW")
         self.addLabel(text = "expression",
             font = normalFont,
+            background = "lightyellow",
             row = 5, column = 1, 
             sticky = "NSEW")
         self.expressionText = self.addTextField(text = "",  # expression presented to user
-            row = 6, column = 1, sticky = "EW") 
+            row = 6, column = 1, sticky = "EW",
+            state = "readonly") 
         self.getButton = self.addButton(text = "GET",   # get expression
             row = 7, column = 0,
             command = self.getExpression)
@@ -85,11 +92,12 @@ class PEMDAS(EasyFrame):
             command = self.checkAnswer)
         self.addLabel(text = "answer",
             font = normalFont,
+            background = "lightyellow",
             row = 8, column = 1, 
             sticky = "NSEW")
     
-        # add initial image
-        self.locked = PhotoImage(file = "lock2b.gif")
+        # add initial image - must be a GIF
+        self.locked = PhotoImage(file = "lock2b.gif")   # create locked instance variable
         self.imageLabel["image"] = self.locked
 
     # class methods
@@ -130,7 +138,11 @@ class PEMDAS(EasyFrame):
         """
         # eval function solves string expression
         evaluation = eval(self.expression)
-        userAnswer = self.answer.getNumber()    # get user solution
+        try:
+            userAnswer = self.answer.getNumber()    # get user solution
+        except ValueError:
+            self.messageBox(title = "ERROR",
+                message = "Answer must be an integer.")
         # if user solution correct
         if evaluation == userAnswer:
             self.locked = PhotoImage(file = "lock2a.gif")   # display unlocked lock
@@ -140,7 +152,7 @@ class PEMDAS(EasyFrame):
             self.correct()
         else:
             self.messageBox(title = "INCORRECT", 
-                message = "You solution is incorrect!")
+                message = "You solution is incorrect.")
             self.incorrect()
     
     def correct(self):
