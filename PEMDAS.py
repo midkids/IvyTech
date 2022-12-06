@@ -15,12 +15,15 @@ MODIFICATIONS BY VERSION:
 12/3/2022 - Added essential logic
 12/4/2022 - Added comments, background color
 12/5/2022 - Added parentheses logic, reset game button
+12/5/2022 - Added timer
 """
 # imports
 from breezypythongui import EasyFrame
 from tkinter import PhotoImage
 from tkinter.font import Font
 from random import randint
+from time import sleep
+from threading import Timer
 
 # PEMDAS class
 class PEMDAS(EasyFrame):
@@ -35,6 +38,7 @@ class PEMDAS(EasyFrame):
         self.expresssion = ""   # the expression being presented to user
         self.evaluation = 0     # the evaluation expression (solution)
         self.attempts = 0       # the number of user attempts to solve expression
+        self.timing = False     # Boolean to start and stop time
 
         # fonts
         titleFont = Font(family = "Verdana", size = 20, slant = "italic")
@@ -53,6 +57,11 @@ class PEMDAS(EasyFrame):
             background = "lightyellow",
             row = 1, column = 0,
             sticky = "W")
+        self.addLabel(text = "Timer",
+            font = normalFont,
+            background = "lightyellow",
+            row = 1, column = 1,
+            sticky = "NS")
         self.addLabel(text = "Lives",
             font = normalFont,
             background = "lightyellow",
@@ -60,6 +69,10 @@ class PEMDAS(EasyFrame):
             sticky = "W")
         self.score = self.addIntegerField(value = 0,    # user score
             row = 2, column = 0,
+            width = 7, sticky = "NS",
+            state = "readonly")
+        self.timer = self.addIntegerField(value = 0,    # timer between get expressions
+            row = 2, column = 1,
             width = 7, sticky = "NS",
             state = "readonly")
         self.lives = self.addIntegerField(value = 3,    # user lives
@@ -97,14 +110,21 @@ class PEMDAS(EasyFrame):
             background = "lightyellow",
             row = 8, column = 1, 
             sticky = "NSEW")
-        self.resetButton = self.addButton(text = "RESET", # reset game
+        self.addButton(text = "RESET", # reset game
             row = 10, column = 1,
             state = "normal",
             command = self.resetGame)
+        self.addLabel(text = "Press RESET to completely reset game",
+            font = normalFont,
+            background = "lightyellow",
+            row = 11, column = 1, 
+            sticky = "NSEW")
     
         # add initial image - must be a GIF
         self.locked = PhotoImage(file = "lock2b.gif")   # create locked instance variable
         self.imageLabel["image"] = self.locked
+
+    
 
     # class methods
     def getExpression(self):
@@ -153,6 +173,19 @@ class PEMDAS(EasyFrame):
         self.submitButton["state"] = "normal"
         self.locked = PhotoImage(file = "lock2b.gif")   # display locked lock
         self.imageLabel["image"] = self.locked
+        self.timing = True
+        self.secondCount = 0
+        
+        # call timerLoop to time user between GET and SUBMIT
+        self.timerLoop()    # start timer
+        
+        
+    def timerLoop(self):
+        self.timer.setNumber(self.secondCount)  # set timer
+        self.secondCount += 1
+        self.ticker = Timer(1, self.timerLoop)
+        self.ticker.start()
+            
 
     def checkAnswer(self):
         """
@@ -182,6 +215,7 @@ class PEMDAS(EasyFrame):
         to the user. It determines if the user has won
         the game.
         """
+        self.ticker.cancel()  # stop timer in timerLoop
         self.locked = PhotoImage(file = "lock2a.gif")   # display unlocked lock
         self.imageLabel["image"] = self.locked
         self.messageBox(title = "CORRECT", 
@@ -248,6 +282,7 @@ class PEMDAS(EasyFrame):
         The resetExpression method resets the 
         expression for presentation to the user.
         """
+        self.timer.setNumber(0)
         self.getButton["state"] = "normal"
         self.submitButton["state"] = "disabled"
         self.expression = ""
@@ -263,12 +298,21 @@ class PEMDAS(EasyFrame):
         self.score.setNumber(0)
         self.lives.setNumber(3)
         self.nbrOperators = 1
-        self.resetExpression()       
+        self.resetExpression()
+
+    def _close(self):
+        self.ticker.cancel()  # stop timer in timerLoop
+        print("made it")
+        self.master.destroy()
+
 
 
 # main method
 def main():
-    PEMDAS().mainloop()
+ 
+    BR = PEMDAS()
+    BR.mainloop()
+       
 
 if __name__ == "__main__":  # check to see if module being called 
     main()
