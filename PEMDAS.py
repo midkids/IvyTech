@@ -16,6 +16,7 @@ MODIFICATIONS BY VERSION:
 12/4/2022 - Added comments, background color
 12/5/2022 - Added parentheses logic, reset game button
 12/5/2022 - Added timer
+12/7/2022 - Added exit button
 """
 # imports
 from breezypythongui import EasyFrame
@@ -38,8 +39,7 @@ class PEMDAS(EasyFrame):
         self.expresssion = ""   # the expression being presented to user
         self.evaluation = 0     # the evaluation expression (solution)
         self.attempts = 0       # the number of user attempts to solve expression
-        self.timing = False     # Boolean to start and stop time
-
+         
         # fonts
         titleFont = Font(family = "Verdana", size = 20, slant = "italic")
         instructionsFont = Font(family = "Verdana", size = 12, slant = "italic")
@@ -56,7 +56,7 @@ class PEMDAS(EasyFrame):
             font = normalFont,
             background = "lightyellow",
             row = 1, column = 0,
-            sticky = "W")
+            sticky = "NS")
         self.addLabel(text = "Timer",
             font = normalFont,
             background = "lightyellow",
@@ -66,7 +66,7 @@ class PEMDAS(EasyFrame):
             font = normalFont,
             background = "lightyellow",
             row = 1, column = 2,
-            sticky = "W")
+            sticky = "NS")
         self.score = self.addIntegerField(value = 0,    # user score
             row = 2, column = 0,
             width = 7, sticky = "NS",
@@ -105,25 +105,43 @@ class PEMDAS(EasyFrame):
             row = 7, column = 2,
             state = "disabled",
             command = self.checkAnswer)
+        self.addLabel(text = "Get expression",
+            font = normalFont,
+            background = "lightyellow",
+            row = 8, column = 0, 
+            sticky = "NSEW")
         self.addLabel(text = "answer",
             font = normalFont,
             background = "lightyellow",
             row = 8, column = 1, 
             sticky = "NSEW")
-        self.addButton(text = "RESET", # reset game
-            row = 10, column = 1,
-            state = "normal",
-            command = self.resetGame)
-        self.addLabel(text = "Press RESET to completely reset game",
+        self.addLabel(text = "Submit expression",
             font = normalFont,
             background = "lightyellow",
-            row = 11, column = 1, 
+            row = 8, column = 2, 
+            sticky = "NSEW")
+        self.addButton(text = "RESET", # reset game
+            row = 10, column = 0,
+            state = "normal",
+            command = self.resetGame)
+        self.addLabel(text = "Reset game",
+            font = normalFont,
+            background = "lightyellow",
+            row = 11, column = 0, 
+            sticky = "NSEW")
+        self.addButton(text = "EXIT", # exit game
+            row = 10, column = 2,
+            state = "normal",
+            command = self._close)
+        self.addLabel(text = "Exit game",
+            font = normalFont,
+            background = "lightyellow",
+            row = 11, column = 2, 
             sticky = "NSEW")
     
         # add initial image - must be a GIF
         self.locked = PhotoImage(file = "lock2b.gif")   # create locked instance variable
         self.imageLabel["image"] = self.locked
-
     
 
     # class methods
@@ -173,9 +191,8 @@ class PEMDAS(EasyFrame):
         self.submitButton["state"] = "normal"
         self.locked = PhotoImage(file = "lock2b.gif")   # display locked lock
         self.imageLabel["image"] = self.locked
-        self.timing = True
         self.secondCount = 0
-        
+        ### self.ticker = Timer(1, self.timerLoop)  # the timer
         # call timerLoop to time user between GET and SUBMIT
         self.timerLoop()    # start timer
         
@@ -183,7 +200,7 @@ class PEMDAS(EasyFrame):
     def timerLoop(self):
         self.timer.setNumber(self.secondCount)  # set timer
         self.secondCount += 1
-        self.ticker = Timer(1, self.timerLoop)
+        self.ticker = Timer(1, self.timerLoop)  # the timer
         self.ticker.start()
             
 
@@ -257,6 +274,7 @@ class PEMDAS(EasyFrame):
         self.attempts += 1  # increment number of user attempts  
         # user hit limit of incorrect solutions 
         if self.attempts == 3:
+            self.ticker.cancel()  # stop timer in timerLoop
             self.messageBox(title = "SOLUTION",
             message = "The correct answer was: " + str(self.evaluation))
             getLives = self.lives.getNumber()
@@ -267,7 +285,8 @@ class PEMDAS(EasyFrame):
                 self.nbrOperators -= 1
             if getLives < 1:    # user lost game
                 self.messageBox(title = "NOVICE", 
-                message = "Study up and try again!")
+                message = "Study up and try again! Resetting game.")
+                self.resetGame()
         else:
             if 3 - self.attempts > 1:
                 self.messageBox(title = "INCORRECT", 
@@ -301,10 +320,14 @@ class PEMDAS(EasyFrame):
         self.resetExpression()
 
     def _close(self):
-        self.ticker.cancel()  # stop timer in timerLoop
-        print("made it")
+        """
+        Cancel the timer and destroy it.
+        """
+        try:
+            self.ticker.cancel()  # stop timer in timerLoop
+        except:
+            print("user pressed exit without getting any expressions")
         self.master.destroy()
-
 
 
 # main method
