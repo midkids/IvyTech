@@ -82,7 +82,7 @@ class PEMDAS(EasyFrame):
         self.imageLabel = self.addLabel(text = "", row = 3, column = 1, # image label
             sticky = "NSEW")
         self.addLabel(text = 
-            "GET expression - solve - enter answer - SUBMIT",
+            "GET expression - solve - enter answer - SUBMIT or press Return",
             font = instructionsFont,
             foreground = "red",
             background = "lightyellow",
@@ -105,6 +105,8 @@ class PEMDAS(EasyFrame):
             row = 7, column = 2,
             state = "disabled",
             command = self.checkAnswer)
+        self.answer.bind("<Return>",    # allow Return key to submit answer
+             lambda event: self.checkAnswer())
         self.addLabel(text = "Get expression",
             font = normalFont,
             background = "lightyellow",
