@@ -17,6 +17,9 @@ MODIFICATIONS BY VERSION:
 12/5/2022 - Added parentheses logic, reset game button
 12/5/2022 - Added timer
 12/7/2022 - Added exit button
+12/10/2022 - Added ability to press enter key in place of SUBMIT button
+12/10/2022 - Added dividing of score by rounded minutes
+12/10/2022 - Added losing rating
 """
 # imports
 from breezypythongui import EasyFrame
@@ -241,23 +244,26 @@ class PEMDAS(EasyFrame):
             message = "Solution is correct!")
         self.attempts += 1  # increment number of user attempts  
         getScore = self.score.getNumber()   # get current user score
+        minutes = round(self.secondCount / 60) # compute minutes from timer seconds
+        if minutes == 0:    # minimum minutes is 1
+            minutes = 1
         if self.attempts == 3:
-            getScore += 10
+            getScore += round(10/minutes)
         elif self.attempts == 2:
-            getScore += 25
+            getScore += round(25/minutes)
         else:
-            getScore += 50
+            getScore += round(50/minutes)
         self.score.setNumber(getScore)  # set updated user score
         self.resetExpression()    # reset expression
-        # user wins game
+        # user progresses or wins game
         if self.nbrOperators == 4:
-            self.messageBox(title = "APPRENTICE", 
+            self.messageBox(title = "WIN", 
                 message = "You are now a PEMDAS+ apprentice!\nKeep going!")
         if self.nbrOperators == 8:
-            self.messageBox(title = "EXPERT", 
+            self.messageBox(title = "WIN", 
                 message = "You are now a PEMDAS+ expert!\nWill you be a master?")
         if self.nbrOperators > 10:
-            self.messageBox(title = "MASTER", 
+            self.messageBox(title = "WIN", 
                 message = "You are a PEMDAS+ master!\nGame will now reset!")
             self.resetGame()
         self.nbrOperators += 1
@@ -278,16 +284,20 @@ class PEMDAS(EasyFrame):
         if self.attempts == 3:
             self.ticker.cancel()  # stop timer in timerLoop
             self.messageBox(title = "SOLUTION",
-            message = "The correct answer was: " + str(self.evaluation))
+                message = "The correct answer was: " + str(self.evaluation))
             getLives = self.lives.getNumber()
             getLives -= 1  
             self.lives.setNumber(getLives)
             self.resetExpression()    # reset expression
             if self.nbrOperators > 1:   # decrement number of operators
                 self.nbrOperators -= 1
-            if getLives < 1:    # user lost game
-                self.messageBox(title = "NOVICE", 
-                message = "Study up and try again! Resetting game.")
+            if self.lives.getNumber() < 1:    # user lost game
+                if self.score.getNumber() < 200:
+                    self.messageBox(title = "LOSE", 
+                    message = "Study up. Try again!\nResetting game.")
+                else:
+                    self.messageBox(title = "LOSE", 
+                    message = "Nice effort. Try again!\nResetting game.")
                 self.resetGame()
         else:
             if 3 - self.attempts > 1:
@@ -303,6 +313,8 @@ class PEMDAS(EasyFrame):
         The resetExpression method resets the 
         expression for presentation to the user.
         """
+        self.ticker.cancel()
+        self.secondCount = 0
         self.timer.setNumber(0)
         self.getButton["state"] = "normal"
         self.submitButton["state"] = "disabled"
