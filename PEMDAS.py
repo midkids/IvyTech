@@ -20,6 +20,7 @@ MODIFICATIONS BY VERSION:
 12/10/2022 - Added ability to press enter key in place of SUBMIT button
 12/10/2022 - Added dividing of score by rounded minutes
 12/10/2022 - Added losing rating
+12/10/2022 - Changed hard-code literals to class constants
 """
 # imports
 from breezypythongui import EasyFrame
@@ -31,6 +32,15 @@ from threading import Timer
 
 # PEMDAS class
 class PEMDAS(EasyFrame):
+    
+    # class constants
+    POINTS2MISSES = 10
+    POINTS1MISS = 30
+    POINTS0MISSES = 50
+    APPRENTICE = 4
+    EXPERT = 7
+    MASTER = 10
+    LOSERATING = 200
 
     def __init__(self):
         EasyFrame.__init__(self, title = "PEMDAS+")
@@ -248,21 +258,21 @@ class PEMDAS(EasyFrame):
         if minutes == 0:    # minimum minutes is 1
             minutes = 1
         if self.attempts == 3:
-            getScore += round(10/minutes)
+            getScore += round(PEMDAS.POINTS2MISSES/minutes)
         elif self.attempts == 2:
-            getScore += round(25/minutes)
+            getScore += round(PEMDAS.POINTS1MISS/minutes)
         else:
-            getScore += round(50/minutes)
+            getScore += round(PEMDAS.POINTS0MISSES/minutes)
         self.score.setNumber(getScore)  # set updated user score
         self.resetExpression()    # reset expression
         # user progresses or wins game
-        if self.nbrOperators == 4:
+        if self.nbrOperators == PEMDAS.APPRENTICE:
             self.messageBox(title = "WIN", 
                 message = "You are now a PEMDAS+ apprentice!\nKeep going!")
-        if self.nbrOperators == 8:
+        if self.nbrOperators == PEMDAS.EXPERT:
             self.messageBox(title = "WIN", 
                 message = "You are now a PEMDAS+ expert!\nWill you be a master?")
-        if self.nbrOperators > 10:
+        if self.nbrOperators > PEMDAS.MASTER:
             self.messageBox(title = "WIN", 
                 message = "You are a PEMDAS+ master!\nGame will now reset!")
             self.resetGame()
@@ -292,7 +302,7 @@ class PEMDAS(EasyFrame):
             if self.nbrOperators > 1:   # decrement number of operators
                 self.nbrOperators -= 1
             if self.lives.getNumber() < 1:    # user lost game
-                if self.score.getNumber() < 200:
+                if self.score.getNumber() < PEMDAS.LOSERATING:
                     self.messageBox(title = "LOSE", 
                     message = "Study up. Try again!\nResetting game.")
                 else:
