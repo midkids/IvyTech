@@ -22,6 +22,7 @@ MODIFICATIONS BY VERSION:
 12/10/2022 - Added losing rating
 12/10/2022 - Changed hard-code literals to class constants
 12/12/2022 - Added additional comments
+12/13/2022 - Added high score components and logic
 """
 # imports
 from breezypythongui import EasyFrame
@@ -142,15 +143,24 @@ class PEMDAS(EasyFrame):
             row = 10, column = 0,
             state = "normal",
             command = self.resetGame)
+        self.highScore = self.addIntegerField(value = 0,    # user score
+            row = 10, column = 1,
+            width = 7, sticky = "NS",
+            state = "readonly") 
+        self.addButton(text = "EXIT", # exit game
+            row = 10, column = 2,
+            state = "normal",
+            command = self._close)
         self.addLabel(text = "Reset game",
             font = normalFont,
             background = "lightyellow",
             row = 11, column = 0, 
             sticky = "NSEW")
-        self.addButton(text = "EXIT", # exit game
-            row = 10, column = 2,
-            state = "normal",
-            command = self._close)
+        self.addLabel(text = "High Score",
+            font = normalFont,
+            background = "lightyellow",
+            row = 11, column = 1, 
+            sticky = "NSEW")
         self.addLabel(text = "Exit game",
             font = normalFont,
             background = "lightyellow",
@@ -341,11 +351,17 @@ class PEMDAS(EasyFrame):
         """
         The resetGame method resets the application
         to allow the user to start completely over.
+        Check for and set high score if applicable.
         """
+        getScore = self.score.getNumber()
+        getHighScore = self.highScore.getNumber()
+        if getScore > getHighScore:     # update high score if applicable
+            self.highScore.setNumber(getScore) 
         self.score.setNumber(0)
         self.lives.setNumber(3)
         self.nbrOperators = 1
         self.resetExpression()
+        
 
     def _close(self):
         """
