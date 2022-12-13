@@ -23,6 +23,8 @@ MODIFICATIONS BY VERSION:
 12/10/2022 - Changed hard-code literals to class constants
 12/12/2022 - Added additional comments
 12/13/2022 - Added high score components and logic
+12/13/2022 - Fixed exception in on invalid input
+12/13/2022 - Changed scoring method to include multiplying by number of operators
 """
 # imports
 from breezypythongui import EasyFrame
@@ -35,12 +37,12 @@ from threading import Timer
 class PEMDAS(EasyFrame):
     
     # class constants
-    POINTS2MISSES = 10  # Number of points awarded if user had two misses
-    POINTS1MISS = 30    # Number of points awarded if user had one misses
-    POINTS0MISSES = 50  # Number of points awarded if user had no misses
-    APPRENTICE = 4      # Number of operators needed to attain apprentice message
-    EXPERT = 7          # Number of operators needed to attain expert message
-    MASTER = 10         # Number of operators needed to attain master message
+    POINTS2MISSES = 10  # Base number of points awarded if user had two misses
+    POINTS1MISS = 30    # Base number of points awarded if user had one misses
+    POINTS0MISSES = 50  # Base number of points awarded if user had no misses
+    APPRENTICE = 4      # Number of operators correctly solved to attain apprentice message
+    EXPERT = 7          # Number of operators correctly solved to attain expert message
+    MASTER = 10         # Number of operators -1 correctly solved to attain master message and win game
     LOSERATING = 200    # Number of points needed to to determine lose message
 
     def __init__(self):
@@ -203,15 +205,15 @@ class PEMDAS(EasyFrame):
             else:    
                 buildExpression += str(randint(1,5))
                 evenOdd = randint(1,2)
-                print("evenOdd", evenOdd)
+                # print("evenOdd", evenOdd)
                 if evenOdd % 2 == 0 and \
                     self.nbrOperators > 1 and \
                     buildExpression[-3] != ")" and \
                     buildExpression[-5:-3] != "**":
                     expressionSlice1 = buildExpression[0:len(buildExpression)-3:]
-                    print("exp1", expressionSlice1)
+                    # print("exp1", expressionSlice1)
                     expressionSlice2 = buildExpression[-3:]
-                    print("exp2", expressionSlice2)
+                    # print("exp2", expressionSlice2)
                     buildExpression = expressionSlice1 + "(" + expressionSlice2 + ")"
         self.expressionText.setText(buildExpression)
         self.expression = buildExpression
@@ -245,6 +247,7 @@ class PEMDAS(EasyFrame):
         except ValueError:
             self.messageBox(title = "ERROR",
                 message = "Answer must be an integer.")
+            userAnswer = 0
         # if user solution correct
         if self.evaluation == userAnswer:
             self.correct()
@@ -271,11 +274,11 @@ class PEMDAS(EasyFrame):
         if minutes == 0:    # minimum minutes is 1
             minutes = 1
         if self.attempts == 3:
-            getScore += round(PEMDAS.POINTS2MISSES/minutes)
+            getScore += round(PEMDAS.POINTS2MISSES / minutes * self.nbrOperators)
         elif self.attempts == 2:
-            getScore += round(PEMDAS.POINTS1MISS/minutes)
+            getScore += round(PEMDAS.POINTS1MISS / minutes * self.nbrOperators)
         else:
-            getScore += round(PEMDAS.POINTS0MISSES/minutes)
+            getScore += round(PEMDAS.POINTS0MISSES / minutes * self.nbrOperators)
         self.score.setNumber(getScore)  # set updated user score
         self.resetExpression()    # reset expression
         # user progresses or wins game
@@ -337,7 +340,10 @@ class PEMDAS(EasyFrame):
         in preparation for presenting the next 
         expression to the user.
         """
-        self.ticker.cancel()
+        try:
+            self.ticker.cancel()  # stop timer in timerLoop
+        except:
+            print("user pressed exit without getting any expressions")
         self.secondCount = 0
         self.timer.setNumber(0)
         self.getButton["state"] = "normal"
