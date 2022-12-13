@@ -21,28 +21,31 @@ MODIFICATIONS BY VERSION:
 12/10/2022 - Added dividing of score by rounded minutes
 12/10/2022 - Added losing rating
 12/10/2022 - Changed hard-code literals to class constants
+12/12/2022 - Added additional comments
 """
 # imports
 from breezypythongui import EasyFrame
 from tkinter import PhotoImage
 from tkinter.font import Font
 from random import randint
-from time import sleep
 from threading import Timer
 
 # PEMDAS class
 class PEMDAS(EasyFrame):
     
     # class constants
-    POINTS2MISSES = 10
-    POINTS1MISS = 30
-    POINTS0MISSES = 50
-    APPRENTICE = 4
-    EXPERT = 7
-    MASTER = 10
-    LOSERATING = 200
+    POINTS2MISSES = 10  # Number of points awarded if user had two misses
+    POINTS1MISS = 30    # Number of points awarded if user had one misses
+    POINTS0MISSES = 50  # Number of points awarded if user had no misses
+    APPRENTICE = 4      # Number of operators needed to attain apprentice message
+    EXPERT = 7          # Number of operators needed to attain expert message
+    MASTER = 10         # Number of operators needed to attain master message
+    LOSERATING = 200    # Number of points needed to to determine lose message
 
     def __init__(self):
+        """
+        PEMDAS class constructor
+        """
         EasyFrame.__init__(self, title = "PEMDAS+")
         self.setResizable(False)
         self.setBackground("lightyellow")
@@ -179,9 +182,9 @@ class PEMDAS(EasyFrame):
             operator = operators[randint(0,3)]  # get random operator
             # if operator is exponentation, make the exponent 2
             # to keep the solution manageable for user
-            # other wise select an integer from 1-5, again to keep
+            # otherwise select an integer from 1-5, again to keep
             # the solution manageable for the user
-            while operator == "**" and usedExponent:
+            while operator == "**" and usedExponent: # keep getting operator until not exponent
                 operator = operators[randint(0,3)]
             buildExpression += operator 
             if operator == "**":    
@@ -287,7 +290,7 @@ class PEMDAS(EasyFrame):
         operators to be included in the next expression, and 
         it calls the resetExpression method to reset the 
         expression for presentation to the user. It 
-        determines if the user has lost the game.
+        determines if the user has lost the game (lives < 1).
         """
         self.attempts += 1  # increment number of user attempts  
         # user hit limit of incorrect solutions 
@@ -320,8 +323,9 @@ class PEMDAS(EasyFrame):
     
     def resetExpression(self):
         """
-        The resetExpression method resets the 
-        expression for presentation to the user.
+        The resetExpression method resets the game
+        in preparation for presenting the next 
+        expression to the user.
         """
         self.ticker.cancel()
         self.secondCount = 0
@@ -357,9 +361,9 @@ class PEMDAS(EasyFrame):
 # main method
 def main():
  
-    BR = PEMDAS()
-    BR.mainloop()
+    BR = PEMDAS()   # instantiate PEMDAS object
+    BR.mainloop()   # run program
        
-
-if __name__ == "__main__":  # check to see if module being called 
+# check to see if module being called 
+if __name__ == "__main__":  
     main()
